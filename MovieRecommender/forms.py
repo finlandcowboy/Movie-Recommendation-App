@@ -22,11 +22,11 @@ class AddMovieForm(forms.ModelForm):
         fields='__all__'
         labels={'title':'Movie Title','image':'','movieduration':'Duration'}
         widgets={
-            'title':forms.TextInput(attrs={'class':'form-control'}),
-            'genres':forms.TextInput(attrs={'class':'form-control'}),
-            'year':forms.TextInput(attrs={'class':'form-control'}),
-            'image':forms.FileInput(attrs={'class':'form-control'}),
-            'movieduration':forms.TextInput(attrs={'class':'form-control'})
+            'Название':forms.TextInput(attrs={'class':'form-control'}),
+            'Жанр':forms.TextInput(attrs={'class':'form-control'}),
+            'Год':forms.TextInput(attrs={'class':'form-control'}),
+            'Обложка':forms.FileInput(attrs={'class':'form-control'}),
+            'Длительность':forms.TextInput(attrs={'class':'form-control'})
         }
 
 class LoginForm(AuthenticationForm):
