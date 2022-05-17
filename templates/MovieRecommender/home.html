@@ -55,7 +55,7 @@
 {% block content %}
 <div class="container wrapper">
 {% if  recommended%}
-<h5 class="my-4 text-light">Recommended Movie For You</u></h5>
+<h5 class="my-4 text-light">Ваши рекомендации</u></h5>
 <div class="row">
 {% for item in recommended %}
 <div class="col-4 mb-2">
@@ -70,7 +70,7 @@
 {% endfor %}
 </div>
 {% else %}
-<h5 class="my-4 text-light">No Recommended Movie Found</u></h5>
+<h5 class="my-4 text-light"></u></h5>
 {% endif %}
 
 
@@ -80,7 +80,7 @@
     <!--Slideshow starts here -->
     {% for movie, range, nSlides in allMovies %}
 
-    <h5 class="my-4 text-light">Filtered By:{{movie.0.genres}}</h5>
+    <h5 class="my-4 text-light"><b>{{movie.0.genres}}</b></h5>
 <div class="row">
     <div id="demo{{forloop.counter}}" class="col carousel slide my-3" data-ride="carousel">
     <ul class="carousel-indicators">
@@ -104,7 +104,7 @@
                         <h5 class="card-title">{{movie.0.title}}</h5>
                       </div>       
                       <div class="card-footer">
-                        <small class="text-muted">{{movie.0.genres}}</small>
+                        <small class="text-muted"><i>{{movie.0.genres}}</i></small>
                         <small class="text-muted">{{movie.0.movieduration}}</small>
                      </div>
           </div>
@@ -119,7 +119,7 @@
                         <h5 class="card-title">{{i.title}}</h5>
                       </div>       
                       <div class="card-footer">
-                        <small class="text-muted">{{i.genres}}</small>
+                        <small class="text-muted"><i>{{i.genres}}</small>
                         <small class="text-muted">{{i.movieduration}}</small>
                      </div>
           </div>
