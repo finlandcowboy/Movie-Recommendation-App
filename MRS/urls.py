@@ -18,6 +18,8 @@ from django.urls import path
 from MovieRecommender import views
 from django.conf import settings
 from django.conf.urls.static import static
+
+import MovieRecommender
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('signup/',views.signup,name="signup"),
@@ -28,3 +30,5 @@ urlpatterns = [
     path("logout/",views.user_logout,name="logout"),
     path("profile/",views.profile,name="profile")
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+handler404 = 'MovieRecommender.views.view_404'

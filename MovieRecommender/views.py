@@ -1,4 +1,4 @@
-from django.shortcuts import render,HttpResponseRedirect
+from django.shortcuts import render,HttpResponseRedirect, redirect
 from django.contrib.auth import authenticate,login,logout,update_session_auth_hash
 from django.contrib.auth.models import User,Group
 from .forms import SignUpForm,AddMovieForm,LoginForm,AddRatingForm
@@ -28,7 +28,7 @@ def filterMovieByGenre():
 
 def generateRecommendation(request):
     movie=Movie.objects.all()
-    rating=Rating.objects.all()
+    rating=Rating.objects.all() 
     x=[] 
     y=[]
     A=[]
@@ -276,4 +276,5 @@ def profile(request):
 
 
 
-
+def view_404(request, exception=None):
+    return HttpResponseRedirect('/home/')
