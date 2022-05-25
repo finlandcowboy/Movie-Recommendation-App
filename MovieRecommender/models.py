@@ -15,4 +15,7 @@ class Rating(models.Model):
     movie=models.ForeignKey(Movie,on_delete=models.CASCADE,default=None)
     rating=models.CharField(max_length=70)
     rated_date=models.DateTimeField(auto_now_add=True)
-
+    ip_address = models.GenericIPAddressField(default='192.168.0.1')
+    lon = models.CharField(max_length=70, default='0')
+    lat = models.CharField(max_length=70, default='0')
+    city = models.CharField(max_length=70, default='0')
