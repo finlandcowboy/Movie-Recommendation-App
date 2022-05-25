@@ -24,7 +24,7 @@ STATIC_DIR=BASE_DIR/'static'
 SECRET_KEY = 'doi1trw8sv=t)#r9zybj#pjp^+&9^kwp!*253^z2y@5hjw4=*o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
