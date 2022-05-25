@@ -9,6 +9,8 @@ from math import sqrt
 import numpy as np
 import matplotlib.pyplot as plt
 from math import ceil
+import json
+from urllib2 import urlopen
 # Create your views here.
 
 def filterMovieByGenre():
@@ -25,6 +27,15 @@ def filterMovieByGenre():
     params={'allMovies':allMovies }
     return params
 
+def visitor_ip_address(request):
+    
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 def generateRecommendation(request):
     movie=Movie.objects.all()
@@ -37,9 +48,17 @@ def generateRecommendation(request):
     D=[]
     #Movie Data Frames
     for item in movie:
-        x=[item.id,item.title,item.movieduration,item.image.url,item.genres] 
+        ip_address = visitor_ip_address(request)
+        # location by ip address 
+        url = 'http://ipinfo.io/json/' + ip_address + '/json'
+        response = urlopen(url)
+        data = json.load(response)
+        city = data['city']
+        lon, lat = list(map(float ,data['loc'].split(',')))
+        
+        x=[item.id,item.title,item.movieduration,item.image.url,item.genres, ip_address, city, lon, lat] 
         y+=[x]
-    movies_df = pd.DataFrame(y,columns=['movieId','title','movieduration','image','genres'])
+    movies_df = pd.DataFrame(y,columns=['movieId','title','movieduration','image','genres', 'ip', 'city', 'lon', 'lat'])
     print("Movies DataFrame")
     print(movies_df)
     print(movies_df.dtypes)
