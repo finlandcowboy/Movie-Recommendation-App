@@ -271,8 +271,14 @@ def dashboard(request):
                     messages.warning(request,'You have already submitted your review!!')
                     return render(request,'MovieRecommender/dashboard.html',params)
                 
-                ip = visitor_ip_address(request)
-                city, lon, lat = location_by_ip(ip)
+                city, lon, lat, ip = '', '', '', ''
+                try:
+                    ip = visitor_ip_address(request)
+                    city, lon, lat = location_by_ip(ip)
+                
+                except:
+                    pass
+                
                 action=Rating(user=u,movie=m,rating=rat, ip_address=ip, lon=lon, lat=lat, city=city)
                 action.save()
                 messages.success(request,'You have submitted'+' '+rat+' '+"star")
