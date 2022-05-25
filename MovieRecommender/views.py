@@ -1,3 +1,4 @@
+import ipaddress
 from django.shortcuts import render,HttpResponseRedirect, redirect
 from django.contrib.auth import authenticate,login,logout,update_session_auth_hash
 from django.contrib.auth.models import User,Group
@@ -10,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import ceil
 import json
-from urllib2 import urlopen
+from urllib.request import urlopen
 # Create your views here.
 
 def filterMovieByGenre():
@@ -26,6 +27,14 @@ def filterMovieByGenre():
         allMovies.append([movie, range(1, nSlides), nSlides])
     params={'allMovies':allMovies }
     return params
+
+def location_by_ip(ip_address):
+    url = 'http://ipinfo.io/json/' + ip_address + '/json'
+    response = urlopen(url)
+    data = json.load(response)
+    city = data['city']
+    lon, lat = list(map(float ,data['loc'].split(',')))
+    return city, lon, lat
 
 def visitor_ip_address(request):
     
@@ -47,15 +56,15 @@ def generateRecommendation(request):
     C=[]
     D=[]
     #Movie Data Frames
-    for item in movie:
+    ip_address, city, lon, lat = None, None, None, None
+    try:
         ip_address = visitor_ip_address(request)
         # location by ip address 
-        url = 'http://ipinfo.io/json/' + ip_address + '/json'
-        response = urlopen(url)
-        data = json.load(response)
-        city = data['city']
-        lon, lat = list(map(float ,data['loc'].split(',')))
+        city, lon, lat = location_by_ip(ip_address)
+    except:
+        ip_address, city, lon, lat = '192.168.0.1', '0', '0', '0'
         
+    for item in movie:
         x=[item.id,item.title,item.movieduration,item.image.url,item.genres, ip_address, city, lon, lat] 
         y+=[x]
     movies_df = pd.DataFrame(y,columns=['movieId','title','movieduration','image','genres', 'ip', 'city', 'lon', 'lat'])
@@ -261,7 +270,10 @@ def dashboard(request):
                 if(count>0):
                     messages.warning(request,'You have already submitted your review!!')
                     return render(request,'MovieRecommender/dashboard.html',params)
-                action=Rating(user=u,movie=m,rating=rat)
+                
+                ip = visitor_ip_address(request)
+                city, lon, lat = location_by_ip(ip)
+                action=Rating(user=u,movie=m,rating=rat, ip_address=ip, lon=lon, lat=lat, city=city)
                 action.save()
                 messages.success(request,'You have submitted'+' '+rat+' '+"star")
             return render(request,'MovieRecommender/dashboard.html',params)
