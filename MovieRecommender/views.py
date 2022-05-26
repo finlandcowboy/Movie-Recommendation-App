@@ -295,7 +295,7 @@ def dashboard(request):
 def user_logout(request):
     if request.user.is_authenticated:
         logout(request)
-        return HttpResponseRedirect('/login/')
+        return HttpResponseRedirect('/home/')
 
 
 def profile(request):

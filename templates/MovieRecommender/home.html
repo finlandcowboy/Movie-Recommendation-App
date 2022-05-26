@@ -49,6 +49,15 @@
         margin-bottom:200px;
         }
 
+        .card-body {
+          max-height: 75px;
+        white-space: nowrap;
+        overflow: hidden;
+        }
+
+        .card {
+          margin-bottom: 15px;
+        }
 
  {% endblock %}
 
@@ -70,11 +79,8 @@
 {% endfor %}
 </div>
 {% else %}
-<h5 class="my-4 text-light"></u></h5>
+<h5 class="my-4 text-light">Для оценивания фильмов необходимо зарегестрироваться</u></h5>
 {% endif %}
-
-
-
 
 <br><br>
     <!--Slideshow starts here -->
