@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from math import ceil
 import json
 from urllib.request import urlopen
+from sklearn.ensemble import RandomForestClassifier
 # Create your views here.
 
 def filterMovieByGenre():
@@ -21,7 +22,7 @@ def filterMovieByGenre():
     genres= {item["genres"] for item in genresMovie}
     for genre in genres:
         movie=Movie.objects.filter(genres=genre)
-        print(movie)
+        # print(movie)
         n = len(movie)
         nSlides = n // 4 + ceil((n / 4) - (n // 4))
         allMovies.append([movie, range(1, nSlides), nSlides])
@@ -65,24 +66,25 @@ def generateRecommendation(request):
         ip_address, city, lon, lat = '192.168.0.1', '0', '0', '0'
         
     for item in movie:
-        x=[item.id,item.title,item.movieduration,item.image.url,item.genres, ip_address, city, lon, lat] 
+        x=[item.id,item.title,item.movieduration,item.image.url,item.genres] 
         y+=[x]
-    movies_df = pd.DataFrame(y,columns=['movieId','title','movieduration','image','genres', 'ip', 'city', 'lon', 'lat'])
-    print("Movies DataFrame")
-    print(movies_df)
-    print(movies_df.dtypes)
+    movies_df = pd.DataFrame(y,columns=['movieId','title','movieduration','image','genres'])
+    # print("Movies DataFrame")
+    # print(movies_df)
+    # print(movies_df.dtypes)
     #Rating Data Frames
-    print(rating)
+    # print(rating)
     for item in rating:
-        A=[item.user.id,item.movie,item.rating]
+        print('Item:', item.ip_address, item.lon ,item.lat)
+        A=[item.user.id,item.movie,item.rating, ip_address, city, lon, lat]
         B+=[A]
-    rating_df=pd.DataFrame(B,columns=['userId','movieId','rating'])
-    print("Rating data Frame")
+    rating_df=pd.DataFrame(B,columns=['userId','movieId','rating', 'ip', 'city', 'lon', 'lat'])
+    # print("Rating data Frame")
     rating_df['userId']=rating_df['userId'].astype(str).astype(np.int64)
     rating_df['movieId']=rating_df['movieId'].astype(str).astype(np.int64)
     rating_df['rating']=rating_df['rating'].astype(str).astype(np.float)
-    print(rating_df)
-    print(rating_df.dtypes)
+    # print(rating_df)
+    # print(rating_df.dtypes)
     if request.user.is_authenticated:
         userid=request.user.id
         #select related is join statement in django.It looks for foreign key and join the table
@@ -95,9 +97,9 @@ def generateRecommendation(request):
                 C=[item.movie.title,item.rating]
                 D+=[C]
             inputMovies=pd.DataFrame(D,columns=['title','rating'])
-            print("Watched Movies by user dataframe")
+            # print("Watched Movies by user dataframe")
             inputMovies['rating']=inputMovies['rating'].astype(str).astype(np.float)
-            print(inputMovies.dtypes)
+            # print(inputMovies.dtypes)
 
             #Filtering out the movies by title
             inputId = movies_df[movies_df['title'].isin(inputMovies['title'].tolist())]
@@ -108,21 +110,21 @@ def generateRecommendation(request):
             #Final input dataframe
             #If a movie you added in above isn't here, then it might not be in the original 
             #dataframe or it might spelled differently, please check capitalisation.
-            print(inputMovies)
+            # print(inputMovies)
 
             #Filtering out users that have watched movies that the input has watched and storing it
             userSubset = rating_df[rating_df['movieId'].isin(inputMovies['movieId'].tolist())]
-            print(userSubset.head())
+            # print(userSubset.head())
 
             #Groupby creates several sub dataframes where they all have the same value in the column specified as the parameter
             userSubsetGroup = userSubset.groupby(['userId'])
             
-            #print(userSubsetGroup.get_group(7))
+            # print(userSubsetGroup.get_group(7))
 
             #Sorting it so users with movie most in common with the input will have priority
             userSubsetGroup = sorted(userSubsetGroup,  key=lambda x: len(x[1]), reverse=True)
 
-            print(userSubsetGroup[0:])
+            # print(userSubsetGroup[0:])
 
 
             userSubsetGroup = userSubsetGroup[0:]
@@ -155,16 +157,16 @@ def generateRecommendation(request):
                 else:
                     pearsonCorrelationDict[name] = 0
 
-            print(pearsonCorrelationDict.items())
+            # print(pearsonCorrelationDict.items())
 
             pearsonDF = pd.DataFrame.from_dict(pearsonCorrelationDict, orient='index')
             pearsonDF.columns = ['similarityIndex']
             pearsonDF['userId'] = pearsonDF.index
             pearsonDF.index = range(len(pearsonDF))
-            print(pearsonDF.head())
+            # print(pearsonDF.head())
 
             topUsers=pearsonDF.sort_values(by='similarityIndex', ascending=False)[0:]
-            print(topUsers.head())
+            # print(topUsers.head())
 
             topUsersRating=topUsers.merge(rating_df, left_on='userId', right_on='userId', how='inner')
             topUsersRating.head()
@@ -185,10 +187,9 @@ def generateRecommendation(request):
             recommendation_df['weighted average recommendation score'] = tempTopUsersRating['sum_weightedRating']/tempTopUsersRating['sum_similarityIndex']
             recommendation_df['movieId'] = tempTopUsersRating.index
             recommendation_df.head()
-
+            #RandomForestClassifier.predict('rating')
             recommendation_df = recommendation_df.sort_values(by='weighted average recommendation score', ascending=False)
             recommender=movies_df.loc[movies_df['movieId'].isin(recommendation_df.head(5)['movieId'].tolist())]
-            print(recommender)
             return recommender.to_dict('records')
             
 
@@ -271,11 +272,10 @@ def dashboard(request):
                     messages.warning(request,'You have already submitted your review!!')
                     return render(request,'MovieRecommender/dashboard.html',params)
                 
-                city, lon, lat, ip = '', '', '', ''
+                city, lon, lat, ip = 'Moscow', '50.234', '12.224', '127.0.0.1'
                 try:
                     ip = visitor_ip_address(request)
                     city, lon, lat = location_by_ip(ip)
-                
                 except:
                     pass
                 
@@ -284,7 +284,7 @@ def dashboard(request):
                 messages.success(request,'You have submitted'+' '+rat+' '+"star")
             return render(request,'MovieRecommender/dashboard.html',params)
         else:
-            #print(request.user.id)
+            print(request.user.id)
             rfm=AddRatingForm()
             params['rform']=rfm
             movie=Movie.objects.all()
